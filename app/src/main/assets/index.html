@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Hospital Maps</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+ --ink:#10184a;--muted:#7783a2;--bg:#f5f7ff;--white:#fff;
+ --primary:#5748ec;--blue:#3d77ff;--pink:#ff4f91;--red:#ff375f;--green:#16c784;
+ --shadow:0 10px 28px rgba(59,69,133,.13);--soft:0 5px 16px rgba(59,69,133,.10)
+}
+html,body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);min-height:100%}
+body{overflow-x:hidden}.app{min-height:100vh;padding-bottom:82px}.page{display:none;min-height:calc(100vh - 82px);animation:fade .24s ease}.page.active{display:block}@keyframes fade{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
+.header{position:relative;color:#fff;padding:27px 22px 62px;overflow:hidden;background:linear-gradient(135deg,#4149ef 0%,#6654ef 48%,#f64da6 125%);border-radius:0 0 34px 34px}
+.header:before,.header:after{content:"";position:absolute;border-radius:50%;filter:blur(.2px);opacity:.2}.header:before{width:220px;height:220px;background:#fff;right:-90px;top:-100px}.header:after{width:180px;height:180px;border:1px solid rgba(255,255,255,.45);right:15px;bottom:-125px}.header.blue{background:linear-gradient(135deg,#4b4ae9,#3d82fb 70%,#71b0ff)}
+.brandrow{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;position:relative;z-index:2}.brand h1{font-size:31px;line-height:1.08;margin:0 0 5px;font-weight:800;letter-spacing:-.7px}.brand .sub{font-size:16px;font-weight:500;opacity:.96}.brand .hint{font-size:14px;line-height:1.45;max-width:285px;margin-top:12px;opacity:.9}
+.health-logo{width:76px;height:76px;flex:0 0 auto;border-radius:26px;background:linear-gradient(145deg,#8c61ff,#ff5f9b);box-shadow:0 12px 28px rgba(23,22,91,.22);display:flex;align-items:center;justify-content:center;transform:rotate(4deg)}.health-logo .heart{position:relative;width:45px;height:39px}.heart:before,.heart:after{content:"";position:absolute;top:5px;width:25px;height:35px;border-radius:25px 25px 0 0;background:rgba(255,255,255,.98)}.heart:before{left:22px;transform:rotate(-45deg);transform-origin:0 100%}.heart:after{left:0;transform:rotate(45deg);transform-origin:100% 100%}.plus{position:absolute;z-index:2;color:#f55391;font-weight:900;font-size:25px;left:13px;top:8px}
+.container{padding:0 18px 20px}.search{position:relative;z-index:4;margin:-31px 0 16px;background:#fff;border-radius:22px;padding:15px 17px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}.search svg{width:21px;height:21px;stroke:#657394;fill:none;stroke-width:2.2}.search input{border:0;outline:0;font-size:14px;flex:1;min-width:0;color:var(--ink);background:transparent}.search .locate{width:30px;height:30px;border-radius:12px;background:#edf2ff;display:flex;align-items:center;justify-content:center}.search .locate svg{stroke:#2163ff;width:18px;height:18px}
+.card{background:#fff;border-radius:24px;box-shadow:var(--soft)}
+.map{height:205px;position:relative;overflow:hidden;background-color:#eaf1ed;background-image:linear-gradient(35deg,transparent 47%,rgba(255,255,255,.92) 48%,rgba(255,255,255,.92) 53%,transparent 54%),linear-gradient(-28deg,transparent 44%,rgba(255,255,255,.75) 45%,rgba(255,255,255,.75) 49%,transparent 50%),linear-gradient(90deg,rgba(124,205,137,.20) 0 14%,transparent 14% 73%,rgba(124,205,137,.20) 73%);border:7px solid #fff}
+.map:before{content:"";position:absolute;width:250px;height:18px;background:#f8d47a;opacity:.55;transform:rotate(-18deg);right:-50px;bottom:25px;border:6px solid rgba(255,255,255,.75)}.road{position:absolute;height:6px;background:rgba(255,255,255,.9);border:1px solid rgba(189,199,209,.25);transform-origin:left center}.r1{width:220px;left:18px;top:58px;transform:rotate(18deg)}.r2{width:270px;left:25px;top:145px;transform:rotate(-31deg)}.r3{width:170px;left:180px;top:34px;transform:rotate(67deg)}
+.pin{position:absolute;width:28px;height:28px;border-radius:50% 50% 50% 0;background:#ff3d65;transform:rotate(-45deg);box-shadow:0 5px 10px rgba(255,61,101,.25)}.pin i{position:absolute;width:9px;height:9px;border-radius:50%;background:#fff;left:9px;top:9px}.p1{left:93px;top:43px}.p2{left:55px;top:103px}.p3{right:74px;top:38px}.userdot{position:absolute;left:53%;top:52%;width:24px;height:24px;border-radius:50%;background:#2773ff;border:4px solid white;box-shadow:0 0 0 28px rgba(54,127,255,.13),0 2px 10px rgba(21,82,201,.45)}
+.location-badge{position:absolute;bottom:13px;left:12px;background:#fff;border-radius:16px;padding:10px 13px;display:flex;gap:9px;align-items:center;box-shadow:0 5px 15px rgba(38,53,88,.13)}.mini-pin{width:26px;height:26px;border-radius:10px;background:#e8f0ff;color:#286cff;display:grid;place-items:center;font-weight:900}.location-badge b{font-size:12px}.location-badge span{display:block;font-size:10px;color:#8090aa;margin-top:2px}.map-target{position:absolute;right:13px;bottom:13px;width:45px;height:45px;background:#fff;border-radius:50%;display:grid;place-items:center;box-shadow:0 5px 14px rgba(38,53,88,.15)}.map-target svg{width:22px;height:22px;stroke:#2269ff;fill:none;stroke-width:2}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 11px}.section-title h2{font-size:18px;margin:0;letter-spacing:-.2px}.section-title a{font-size:12px;color:#275fff;text-decoration:none;font-weight:650}
+.hospital{display:grid;grid-template-columns:72px 1fr auto;gap:11px;align-items:center;padding:10px;margin-bottom:11px;border-radius:20px;background:#fff;box-shadow:0 5px 16px rgba(54,70,130,.08)}.hospital-illus{height:64px;border-radius:14px;background:linear-gradient(160deg,#7dc8ff,#4c70d9);position:relative;overflow:hidden}.hospital-illus:before{content:"";position:absolute;left:14px;right:14px;bottom:0;height:45px;background:#f9fbff;border-radius:4px 4px 0 0;box-shadow:inset 0 -7px 0 #dce7ff}.hospital-illus:after{content:"+";position:absolute;left:27px;top:8px;color:#f43f65;font-size:22px;font-weight:900}.hospital-info b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.open{font-size:11px;color:#0abf72;margin:5px 0}.open:before{content:"";display:inline-block;width:7px;height:7px;background:#19c77b;border-radius:50%;margin-right:6px}.address{font-size:10px;color:#8390aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}.distance{text-align:right}.pill{display:inline-flex;align-items:center;gap:4px;background:#eef3ff;color:#275fff;padding:6px 8px;border-radius:12px;font-size:11px;font-weight:800}.eta{font-size:10px;color:#8b97ae;margin-top:6px}
+.emergency-cta{margin-top:14px;border:0;width:100%;color:white;text-align:left;border-radius:21px;background:linear-gradient(105deg,#ff315a,#ff5677);padding:15px 18px;box-shadow:0 11px 24px rgba(255,49,90,.24);display:flex;align-items:center;gap:13px}.phone-round{width:48px;height:48px;border-radius:18px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:0 0 auto}.phone-round svg{width:26px;height:26px;fill:#fff}.emergency-cta b{font-size:17px}.emergency-cta small{display:block;margin-top:4px;opacity:.9}.chev{margin-left:auto;font-size:28px;line-height:1}
+.emergency-head{background:linear-gradient(135deg,#633fe8,#ee4cac);color:#fff;padding:24px 20px 46px;border-radius:0 0 32px 32px;text-align:center;position:relative;overflow:hidden}.emergency-head h1,.about-head h1{font-size:28px;margin:4px 0 5px}.emergency-head p,.about-head p{margin:0;font-size:13px;opacity:.9}.emergency-content{margin-top:-28px;padding:0 18px 18px}.sos-card{background:#fff;border-radius:31px;padding:31px 17px 20px;text-align:center;box-shadow:var(--shadow)}.sos-ring{width:114px;height:114px;border-radius:50%;margin:0 auto 8px;background:rgba(255,61,99,.08);display:grid;place-items:center;box-shadow:0 0 0 12px rgba(255,61,99,.05)}.sos-circle{width:82px;height:82px;border-radius:50%;background:linear-gradient(145deg,#ff5b78,#f22c59);display:grid;place-items:center;box-shadow:0 11px 25px rgba(244,50,91,.3);animation:pulse 1.8s infinite}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}.sos-circle svg{width:38px;height:38px;fill:#fff}.sos-card .sos{font-size:42px;font-weight:900;color:#f52d59;letter-spacing:-1px;margin:4px 0}.sos-card h3{font-size:18px;margin:0 0 7px}.sos-card .desc{font-size:13px;color:#73809e;line-height:1.45;max-width:320px;margin:0 auto 18px}.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;text-align:left}.action{border:0;border-radius:20px;padding:14px;min-height:132px;position:relative;overflow:hidden}.action .iconbox{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;margin-bottom:10px}.action .iconbox svg{width:24px;height:24px;fill:#fff}.action b{font-size:15px;display:block;line-height:1.12}.action small{font-size:10.5px;display:block;margin-top:5px;line-height:1.35;color:#71809f}.action.red{background:linear-gradient(140deg,#fff0f3,#ffe5eb)}.action.red .iconbox{background:linear-gradient(145deg,#ff5b72,#f5325c)}.action.blue{background:linear-gradient(140deg,#eef9ff,#dff0ff)}.action.blue .iconbox{background:linear-gradient(145deg,#62b6ff,#2b77ed)}.action.green{background:linear-gradient(140deg,#eafff5,#d8f7eb)}.action.green .iconbox{background:linear-gradient(145deg,#55d9aa,#16b77f)}.action.purple{background:linear-gradient(140deg,#f5eeff,#eee1ff)}.action.purple .iconbox{background:linear-gradient(145deg,#9c6cff,#6c42ec)}.alert{margin-top:12px;padding:11px 13px;border-radius:15px;background:#fff0f3;color:#c63d5b;font-size:10.5px;line-height:1.35}.alert b{font-size:14px;margin-right:4px}
+.about-head{background:linear-gradient(135deg,#4b49e9,#3d7ffa 70%,#63a4ff);color:#fff;padding:25px 22px 48px;border-radius:0 0 34px 34px;position:relative;overflow:hidden}.about-wrap{padding:0 18px 18px;margin-top:-24px}.identity{padding:18px;display:grid;grid-template-columns:82px 1fr;gap:14px;align-items:start}.app-icon{height:82px;border-radius:23px;background:linear-gradient(145deg,#8a57ff,#ef4da9);display:grid;place-items:center;box-shadow:0 10px 22px rgba(105,68,220,.24)}.hospital-icon{width:48px;height:48px;position:relative}.hospital-icon .building{position:absolute;left:7px;right:7px;bottom:0;height:36px;background:#fff;border-radius:5px}.hospital-icon .building:before{content:"+";position:absolute;top:-13px;left:10px;background:#fff;color:#f04970;width:20px;height:20px;border-radius:5px;text-align:center;line-height:20px;font-weight:900}.hospital-icon .building:after{content:"";position:absolute;left:7px;right:7px;top:9px;height:15px;background:repeating-linear-gradient(90deg,#7759ef 0 5px,transparent 5px 10px),repeating-linear-gradient(#7759ef 0 5px,transparent 5px 10px)}.identity h2{font-size:21px;margin:5px 0 2px}.identity .version{font-size:11px;color:#7986a1}.identity p{font-size:11px;color:#64728e;line-height:1.45;margin:8px 0 0}.group-title{font-size:17px;margin:18px 2px 9px}.list-card{overflow:hidden;padding:0 13px}.row{display:grid;grid-template-columns:43px 1fr 18px;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #edf0f8}.row:last-child{border-bottom:0}.rowicon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:#eef3ff}.rowicon.red{background:#ffe9ee}.rowicon.green{background:#e7faf3}.rowicon.orange{background:#fff3df}.rowicon svg{width:22px;height:22px;fill:#3d70f4}.rowicon.red svg{fill:#fb3e62}.rowicon.green svg{fill:#10b77b}.rowicon.orange svg{fill:#ff9d19}.row b{font-size:12px;display:block}.row small{font-size:10px;color:#8490aa;display:block;margin-top:2px;line-height:1.2}.arrow{color:#8e9ab2;font-size:22px}
+.bottom-nav{position:fixed;z-index:99;left:0;right:0;bottom:0;height:78px;background:rgba(255,255,255,.97);border-top:1px solid rgba(224,228,241,.9);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 14px 7px;box-shadow:0 -8px 25px rgba(66,76,125,.08)}.nav{border:0;background:transparent;color:#7e8aa4;font-size:9.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}.nav svg{width:24px;height:24px;fill:#7e8aa4}.nav.active{color:#5a35ef}.nav.active svg{fill:#5a35ef}.nav.active:after{content:"";position:absolute;bottom:-2px;width:22px;height:3px;border-radius:3px;background:#5a35ef}
+@media(min-width:600px){body{background:#eaf0ff}.app{max-width:430px;margin:auto;background:var(--bg);box-shadow:0 0 45px rgba(44,55,113,.15)}.bottom-nav{max-width:430px;margin:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="page active" id="home">
+  <div class="header">
+    <div class="brandrow">
+      <div class="brand"><h1>Hospital Maps</h1><div class="sub">Emergency Hospital Finder</div><div class="hint">Temukan rumah sakit di sekitar Anda dengan bantuan GPS.</div></div>
+      <div class="health-logo"><div class="heart"><span class="plus">+</span></div></div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <input placeholder="Cari rumah sakit, kota, atau area..." />
+      <span class="locate"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg></span>
+    </div>
+    <div class="card map">
+      <i class="road r1"></i><i class="road r2"></i><i class="road r3"></i>
+      <span class="pin p1"><i></i></span><span class="pin p2"><i></i></span><span class="pin p3"><i></i></span><span class="userdot"></span>
+      <div class="location-badge"><div class="mini-pin">o</div><div><b>Lokasi Anda</b><span>Jakarta Pusat</span></div></div>
+      <div class="map-target"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg></div>
+    </div>
+    <div class="section-title"><h2>Rumah Sakit Terdekat</h2><a href="#">Lihat Semua &gt;</a></div>
+    <div class="hospital"><div class="hospital-illus"></div><div class="hospital-info"><b>RS Sehat Sentosa</b><div class="open">24 Jam</div><div class="address">Jl. Melati No. 12, Jakarta Pusat</div></div><div class="distance"><span class="pill">1.2 km</span><div class="eta">~ 5 menit</div></div></div>
+    <div class="hospital"><div class="hospital-illus" style="background:linear-gradient(160deg,#9be0ff,#557bd2)"></div><div class="hospital-info"><b>RS Harapan Medika</b><div class="open">24 Jam</div><div class="address">Jl. Sudirman No. 88, Jakarta Pusat</div></div><div class="distance"><span class="pill">2.6 km</span><div class="eta">~ 10 menit</div></div></div>
+    <button class="emergency-cta" onclick="showPage('emergency')"><span class="phone-round"><svg viewBox="0 0 24 24"><path d="M6.7 10.8c1.6 3.1 3.4 4.9 6.5 6.5l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg></span><span><b>Emergency Call</b><small>Temukan bantuan terdekat sekarang</small></span><span class="chev">&gt;</span></button>
+  </div>
+</section>
+
+<section class="page" id="emergency">
+  <div class="emergency-head"><h1>Emergency Call</h1><p>Bantuan darurat, lebih cepat dan lebih dekat.</p></div>
+  <div class="emergency-content">
+    <div class="sos-card">
+      <div class="sos-ring"><div class="sos-circle"><svg viewBox="0 0 24 24"><path d="M6.7 10.8c1.6 3.1 3.4 4.9 6.5 6.5l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg></div></div>
+      <div class="sos">SOS</div><h3>Dalam keadaan darurat?</h3><div class="desc">Gunakan menu di bawah untuk mendapatkan bantuan dan melihat lokasi rumah sakit terdekat di sekitar Anda.</div>
+      <div class="action-grid">
+        <button class="action red" onclick="testAction('Panggil Ambulans')"><span class="iconbox"><svg viewBox="0 0 24 24"><path d="M3 6h11v8H3zM14 9h4l3 3v2h-7zM7 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7 8h3V5h2v3h3v2h-3v3h-2v-3H7z"/></svg></span><b>Panggil<br>Ambulans</b><small>Hubungi layanan ambulans darurat</small></button>
+        <button class="action blue" onclick="testAction('Rumah Sakit Terdekat')"><span class="iconbox"><svg viewBox="0 0 24 24"><path d="M4 21V7h5V3h6v4h5v14h-6v-5h-4v5H4zm7-16v2H9v2h2v2h2V9h2V7h-2V5h-2z"/></svg></span><b>Rumah Sakit<br>Terdekat</b><small>Lihat lokasi di peta</small></button>
+        <button class="action green" onclick="testAction('Bagikan Lokasi Saya')"><span class="iconbox"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.1 7 13 7 13s7-7.9 7-13a7 7 0 0 0-7-7zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg></span><b>Bagikan<br>Lokasi Saya</b><small>Kirim lokasi ke keluarga atau petugas</small></button>
+        <button class="action purple" onclick="testAction('Hotline Rumah Sakit')"><span class="iconbox"><svg viewBox="0 0 24 24"><path d="M6.7 10.8c1.6 3.1 3.4 4.9 6.5 6.5l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg></span><b>Hotline<br>Rumah Sakit</b><small>Hubungi rumah sakit terdekat</small></button>
+      </div>
+      <div class="alert"><b>!</b> Dalam kondisi darurat yang mengancam jiwa, segera hubungi 119 atau layanan darurat setempat.</div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="about">
+  <div class="about-head"><h1>About</h1><p>Tentang Hospital Maps</p></div>
+  <div class="about-wrap">
+    <div class="card identity"><div class="app-icon"><div class="hospital-icon"><div class="building"></div></div></div><div><h2>Hospital Maps</h2><div class="version">Version 2.0.0</div><p>Emergency Hospital Finder untuk membantu menemukan rumah sakit dengan cepat, akurat, dan mudah.</p></div></div>
+    <h3 class="group-title">Kontak Darurat</h3>
+    <div class="card list-card">
+      <div class="row"><div class="rowicon red"><svg viewBox="0 0 24 24"><path d="M6.7 10.8c1.6 3.1 3.4 4.9 6.5 6.5l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg></div><div><b style="color:#ef3157">119</b><small>Layanan Darurat Indonesia</small></div><div class="arrow">&gt;</div></div>
+      <div class="row"><div class="rowicon"><svg viewBox="0 0 24 24"><path d="M6.7 10.8c1.6 3.1 3.4 4.9 6.5 6.5l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg></div><div><b style="color:#2f65e9">118</b><small>Ambulans</small></div><div class="arrow">&gt;</div></div>
+    </div>
+    <h3 class="group-title">Fitur Aplikasi</h3>
+    <div class="card list-card">
+      <div class="row"><div class="rowicon"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.1 7 13 7 13s7-7.9 7-13a7 7 0 0 0-7-7zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg></div><div><b>Pencarian Rumah Sakit</b><small>Temukan rumah sakit terdekat dengan GPS</small></div><div class="arrow">&gt;</div></div>
+      <div class="row"><div class="rowicon green"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zm0 12L3.7 9.8 2 11l10 5 10-5-1.7-1.2L12 14zm0 4-8.3-4.2L2 15l10 5 10-5-1.7-1.2L12 18z"/></svg></div><div><b>Peta Interaktif</b><small>Lihat lokasi rumah sakit di peta</small></div><div class="arrow">&gt;</div></div>
+      <div class="row"><div class="rowicon orange"><svg viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-7z"/></svg></div><div><b>Akses Cepat</b><small>Tombol darurat untuk bantuan segera</small></div><div class="arrow">&gt;</div></div>
+      <div class="row"><div class="rowicon"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7z"/></svg></div><div><b>Informasi Terpercaya</b><small>Data rumah sakit yang selalu diperbarui</small></div><div class="arrow">&gt;</div></div>
+    </div>
+    <h3 class="group-title" style="margin-top:12px"></h3>
+    <div class="card list-card"><div class="row"><div class="rowicon"><svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-3.3 0-6 1.7-6 4v2h12v-2c0-2.3-2.7-4-6-4zm8 0c-.5 0-1 0-1.5.1 1.5 1 2.5 2.3 2.5 3.9v2h5v-2c0-2.3-2.7-4-6-4z"/></svg></div><div><b>Tentang Kami</b><small>Misi, visi, dan tim pengembang</small></div><div class="arrow">&gt;</div></div></div>
+  </div>
+</section>
+</div>
+
+<nav class="bottom-nav">
+<button class="nav active" data-page="home" onclick="showPage('home')"><svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3z"/></svg><span>HOME</span></button>
+<button class="nav" data-page="emergency" onclick="showPage('emergency')"><svg viewBox="0 0 24 24"><path d="M6.7 10.8c1.6 3.1 3.4 4.9 6.5 6.5l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg><span>EMERGENCY</span></button>
+<button class="nav" data-page="about" onclick="showPage('about')"><svg viewBox="0 0 24 24"><path d="M11 10h2v8h-2zm0-4h2v2h-2zm1-4a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg><span>ABOUT</span></button>
+</nav>
+<script>
+function showPage(id){document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});document.getElementById(id).classList.add('active');document.querySelectorAll('.nav').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-page')===id)});window.scrollTo(0,0)}
+function testAction(name){alert(name+' - mode testing UI. Fungsi akan diaktifkan pada tahap berikutnya.');}
+</script>
+</body>
+</html>
